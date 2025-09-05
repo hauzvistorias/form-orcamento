@@ -25,17 +25,18 @@
     </select></label>
 
     <label>Tipo de imóvel:</label>
-    <div class="radio-group">
-        <label><input type="radio" name="tipoImovel" value="casa-terrea"> Casa Térrea</label>
-        <label><input type="radio" name="tipoImovel" value="sobrado"> Sobrado</label>
-        <label><input type="radio" name="tipoImovel" value="apartamento"> Apartamento</label>
-        <label><input type="radio" name="tipoImovel" value="galpao"> Galpão</label>
-        <label><input type="radio" name="tipoImovel" value="kitinete"> Kitinete/Sala Comercial</label>
-        <label><input type="radio" name="tipoImovel" value="outro"> Outro</label>
-    </div>
+    <select name="tipoImovel" id="tipoImovel" required>
+        <option value="" disabled selected>--- Selecione o tipo ---</option>
+        <option value="casa-terrea">Casa Térrea</option>
+        <option value="sobrado">Sobrado</option>
+        <option value="apartamento">Apartamento</option>
+        <option value="galpao">Galpão</option>
+        <option value="kitinete">Kitinete / Sala Comercial</option>
+        <option value="outro">Outro</option>
+    </select></label>
 
     <label>Área construída (m²):
-        <input type="number" id="areaConstruida" min="0" value="" required>
+        <input type="number" id="areaConstruida" min="1" value="" required>
     </label>
 
     <label>Área do terreno (m²):
@@ -52,13 +53,13 @@
         <label><input type="checkbox" class="mobiliario" value="6"> 6. Inventário - louças, talheres, objetos decorativos, eletrodomésticos pequenos, etc</label>
     </div>
 
-    <label>Cidade:</label>
-    <div class="radio-group">
-        <label><input type="radio" name="cidade" value="Itu" checked> Itu</label>
-        <label><input type="radio" name="cidade" value="Salto"> Salto</label>
-        <label><input type="radio" name="cidade" value="Indaiatuba"> Indaiatuba</label>
-        <label><input type="radio" name="cidade" value="outra"> Outra</label>
-    </div>
+    <label>Cidade:
+    <select name="cidade" id="cidade" required>
+        <option value="Itu" selected>Itu</option>
+        <option value="Salto">Salto</option>
+        <option value="Indaiatuba">Indaiatuba</option>
+        <option value="outra">Outra</option>
+    </select></label>
 </form>
 
 <div id="resultado">Valor estimado: R$ 0,00</div>
