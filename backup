@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orçamento Vistoria Imobiliária</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    label { display: block; margin-top: 10px; }
+    input[type="number"] { width: 100px; }
+    .checkbox-group, .radio-group { margin-left: 20px; }
+    #resultado { margin-top: 20px; font-weight: bold; font-size: 1.2em; }
+</style>
+</head>
+<body>
+
+<h2>Formulário de Vistoria Imobiliária</h2>
+
+<form id="vistoriaForm">
+    <label>Nome/Imobiliária:
+        <input type="text" id="nome" required>
+    </label>
+
+    <label>E-mail:
+        <input type="email" id="email" required>
+    </label>
+
+    <label>Celular:
+        <input type="tel" id="celular" required>
+    </label>
+
+    <label>Tipo de vistoria:</label>
+    <div class="radio-group">
+        <label><input type="radio" name="tipoVistoria" value="entrada" checked> Entrada</label>
+        <label><input type="radio" name="tipoVistoria" value="saida"> Saída</label>
+        <label><input type="radio" name="tipoVistoria" value="outro"> Outro</label>
+    </div>
+
+    <label>Tipo de imóvel:</label>
+    <div class="radio-group">
+        <label><input type="radio" name="tipoImovel" value="casa-terrea"> Casa Térrea</label>
+        <label><input type="radio" name="tipoImovel" value="sobrado"> Sobrado</label>
+        <label><input type="radio" name="tipoImovel" value="apartamento"> Apartamento</label>
+        <label><input type="radio" name="tipoImovel" value="galpao"> Galpão</label>
+        <label><input type="radio" name="tipoImovel" value="kitinete"> Kitinete/Sala Comercial</label>
+        <label><input type="radio" name="tipoImovel" value="outro"> Outro</label>
+    </div>
+
+    <label>Área construída (m²):
+        <input type="number" id="areaConstruida" min="0" value="0" required>
+    </label>
+
+    <label>Área do terreno (m²):
+        <input type="number" id="areaTerreno" min="0" value="0">
+    </label>
+
+    <label>Mobiliário (marque pelo menos 1):</label>
+    <div class="checkbox-group">
+        <label><input type="checkbox" class="mobiliario" value="1"> 1. Nenhum/planejados cozinha e banheiros</label>
+        <label><input type="checkbox" class="mobiliario" value="2"> 2. Planejados dormitórios/outros ambientes</label>
+        <label><input type="checkbox" class="mobiliario" value="3"> 3. Eletros grandes</label>
+        <label><input type="checkbox" class="mobiliario" value="4"> 4. Móveis soltos - mesas, cadeiras, sofá, poltrona</label>
+        <label><input type="checkbox" class="mobiliario" value="5"> 5. Móveis soltos - camas, mesa de cabeceira</label>
+        <label><input type="checkbox" class="mobiliario" value="6"> 6. Inventário - louças, talheres, objetos decorativos, eletrodomésticos pequenos, etc</label>
+    </div>
+
+    <label>Cidade:</label>
+    <div class="radio-group">
+        <label><input type="radio" name="cidade" value="Itu" checked> Itu</label>
+        <label><input type="radio" name="cidade" value="Salto"> Salto</label>
+        <label><input type="radio" name="cidade" value="Indaiatuba"> Indaiatuba</label>
+        <label><input type="radio" name="cidade" value="outra"> Outra</label>
+    </div>
+</form>
+
+<div id="resultado">Valor estimado: R$ 0,00</div>
+
+<script>
+const form = document.getElementById('vistoriaForm');
+const resultado = document.getElementById('resultado');
+
+form.addEventListener('input', calcular);
+
+function calcular() {
+    const tipoImovel = document.querySelector('input[name="tipoImovel"]:checked')?.value;
+    const cidade = document.querySelector('input[name="cidade"]:checked')?.value;
+    let areaConstruida = parseFloat(document.getElementById('areaConstruida').value) || 0;
+    const areaTerreno = parseFloat(document.getElementById('areaTerreno').value) || 0;
+
+    if(!tipoImovel || !cidade) {
+        resultado.textContent = 'Selecione o tipo de imóvel e a cidade.';
+        return;
+    }
+
+    // Área mínima 80 m²
+    if (areaConstruida < 80) areaConstruida = 80;
+
+    // Coeficiente mobiliário
+    const checkboxes = document.querySelectorAll('.mobiliario:checked');
+    if (checkboxes.length === 0) {
+        resultado.textContent = 'Marque pelo menos 1 opção de mobiliário.';
+        return;
+    }
+
+    let coef = 1.25;
+    let inventario = false;
+    checkboxes.forEach(cb => {
+        if(cb.value == '3') coef += 0.12;
+        if(cb.value == '4') coef += 0.11;
+        if(cb.value == '5') coef += 0.11;
+        if(cb.value == '6') inventario = true;
+    });
+
+    let valorConstruida = areaConstruida * coef;
+
+    // Área do terreno
+    let valorTerreno = 0;
+    if(['casa-terrea','sobrado','galpao','outro'].includes(tipoImovel) && areaTerreno > 0) {
+        if(tipoImovel == 'sobrado') {
+            valorTerreno = (areaTerreno - (areaConstruida * 0.6)) * 0.40;
+        } else {
+            valorTerreno = (areaTerreno - areaConstruida) * 0.40;
+        }
+        if(valorTerreno < 0) valorTerreno = 0;
+    }
+
+    let valorTotal = valorConstruida + valorTerreno;
+
+    // Ajuste por cidade
+    let mensagemExtra = '';
+    if(cidade === 'Salto') valorTotal += 20;
+    if(cidade === 'Indaiatuba') valorTotal += 50;
+    if(cidade === 'outra') mensagemExtra = ' | Confirmar o valor de deslocamento';
+
+    // Ajuste por tipo de imóvel
+    if(tipoImovel === 'kitinete') valorTotal -= 20;
+
+    // Arredondar sempre para cima
+    valorTotal = Math.ceil(valorTotal);
+
+    // Formatação R$ 999.999,00
+    valorTotal = valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
+
+    let mensagem = `Valor estimado: ${valorTotal}`;
+    if(inventario) mensagem += ' | Inventário será orçado à parte';
+    if(mensagemExtra) mensagem += mensagemExtra;
+
+    resultado.textContent = mensagem;
+}
+</script>
+
+</body>
+</html>
