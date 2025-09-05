@@ -40,7 +40,7 @@
     </label>
 
     <label>Área do terreno (m²):
-        <input type="number" id="areaTerreno" min="0" value="">
+        <input type="number" id="areaTerreno" min="0" value="0" required>
     </label>
 
     <label>Mobiliário (marque pelo menos 1):</label>
@@ -80,12 +80,12 @@ document.getElementById('enviarWhatsapp').addEventListener('click', () => {
     const dataVistoria = document.getElementById('dataVistoria').value;
 
     // Mobiliário selecionado
-    const checkboxes = Array.from(document.querySelectorAll('.mobiliario:checked')).map(cb => cb.nextSibling.textContent.trim()).join('; ');
+    const checkboxes = Array.from(document.querySelectorAll('.mobiliario:checked')).map(cb => cb.nextSibling.textContent.trim()).join('\n');
 
     // Valor do orçamento
     const valorOrcamento = resultado.textContent.replace('Valor estimado: ', '');
 
-    const mensagem = `Orçamento de Vistoria:
+    const mensagem = `Orçamento de Vistoria:\n
 Data: *${dataVistoria}*\n
 Tipo de vistoria: *${tipoVistoria}*\n
 Tipo de imóvel: *${tipoImovel}*\n
