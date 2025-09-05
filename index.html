@@ -80,7 +80,7 @@ document.getElementById('enviarWhatsapp').addEventListener('click', () => {
     const dataVistoria = document.getElementById('dataVistoria').value;
 
     // Mobiliário selecionado
-    const checkboxes = Array.from(document.querySelectorAll('.mobiliario:checked')).map(cb => cb.nextSibling.textContent.trim()).join('\n');
+    const checkboxes = Array.from(document.querySelectorAll('.mobiliario:checked')).map(cb => `*${cb.nextSibling.textContent.trim()}*`).join('\n');
 
     // Valor do orçamento
     const valorOrcamento = resultado.textContent.replace('Valor estimado: ', '');
@@ -92,7 +92,8 @@ Tipo de imóvel: *${tipoImovel}*\n
 Área construída: *${areaConstruida} m²*\n
 Área do terreno: *${areaTerreno} m²*\n
 Cidade: *${cidade}*\n
-Mobiliário: *${checkboxes}*\n
+Mobiliário:\n
+*${checkboxes}*\n
 Valor calculado: *${valorOrcamento}*`;
 
     // Substitua SEUNUMERO pelo seu número no formato internacional, ex: 5511999999999
