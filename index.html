@@ -86,21 +86,20 @@ document.getElementById('enviarWhatsapp').addEventListener('click', () => {
     const valorOrcamento = resultado.textContent.replace('Valor estimado: ', '');
 
     const mensagem = `Orçamento de Vistoria:
-Data: ${dataVistoria}
-Tipo de vistoria: ${tipoVistoria}
-Tipo de imóvel: ${tipoImovel}
-Área construída: ${areaConstruida} m²
-Área do terreno: ${areaTerreno} m²
-Cidade: ${cidade}
-Mobiliário: ${checkboxes}
-${valorOrcamento}`;
+Data: *${dataVistoria}*\n
+Tipo de vistoria: *${tipoVistoria}*\n
+Tipo de imóvel: *${tipoImovel}*\n
+Área construída: *${areaConstruida} m²*\n
+Área do terreno: *${areaTerreno} m²*\n
+Cidade: *${cidade}*\n
+Mobiliário: *${checkboxes}*\n
+Valor calculado: *${valorOrcamento}*`;
 
     // Substitua SEUNUMERO pelo seu número no formato internacional, ex: 5511999999999
     window.open(`https://wa.me/5511974697416?text=${encodeURIComponent(mensagem)}`, '_blank');
 });
 </script>
 
-    
 <script>
 const form = document.getElementById('vistoriaForm');
 const resultado = document.getElementById('resultado');
