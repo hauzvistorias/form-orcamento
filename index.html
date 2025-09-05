@@ -71,8 +71,8 @@ const resultado = document.getElementById('resultado');
 form.addEventListener('input', calcular);
 
 function calcular() {
-    const tipoImovel = document.querySelector('input[name="tipoImovel"]:checked')?.value;
-    const cidade = document.querySelector('input[name="cidade"]:checked')?.value;
+    const tipoImovel = document.getElementById('tipoImovel').value;
+    const cidade = document.getElementById('cidade').value;
     let areaConstruida = parseFloat(document.getElementById('areaConstruida').value) || 0;
     const areaTerreno = parseFloat(document.getElementById('areaTerreno').value) || 0;
 
