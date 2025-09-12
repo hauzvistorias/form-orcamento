@@ -99,7 +99,6 @@ Mobiliário:\n
 ${checkboxes}\n
 Valor calculado: *${valorOrcamento}*`;
 
-    // Substitua SEUNUMERO pelo seu número no formato internacional, ex: 5511999999999
     window.open(`https://wa.me/5511974697416?text=${encodeURIComponent(mensagem)}`, '_blank');
 });
 </script>
@@ -113,16 +112,19 @@ form.addEventListener('change', calcular);
 function calcular() {
     const tipoImovel = document.getElementById('tipoImovel').value;
     const cidade = document.getElementById('cidade').value;
-    let areaConstruida = parseFloat(document.getElementById('areaConstruida').value) || 0;
+
+    // preserva o valor informado e define área usada no cálculo (mínimo 80)
+    const originalAreaConstruidaInput = parseFloat(document.getElementById('areaConstruida').value);
+    let originalAreaConstruida = isNaN(originalAreaConstruidaInput) ? 0 : originalAreaConstruidaInput;
+    let areaParaCalculo = originalAreaConstruida;
+    if (areaParaCalculo < 80) areaParaCalculo = 80;
+
     const areaTerreno = parseFloat(document.getElementById('areaTerreno').value) || 0;
 
     if(!tipoImovel || !cidade) {
         resultado.textContent = 'Selecione o tipo de imóvel e a cidade.';
         return;
     }
-
-    // Área mínima 80 m²
-    if (areaConstruida < 80) areaConstruida = 80;
 
     // Coeficiente mobiliário
     const checkboxes = document.querySelectorAll('.mobiliario:checked');
@@ -140,15 +142,17 @@ function calcular() {
         if(cb.value == '6') inventario = true;
     });
 
-    let valorConstruida = areaConstruida * coef;
+    let valorConstruida = areaParaCalculo * coef;
 
-    // Área do terreno
+    // usa o valor ORIGINAL informado pelo usuário para subtrair do terreno
+    const areaParaSubtrair = originalAreaConstruida > 0 ? originalAreaConstruida : areaParaCalculo;
+
     let valorTerreno = 0;
     if(['casa-terrea','sobrado','galpao','outro'].includes(tipoImovel) && areaTerreno > 0) {
         if(tipoImovel == 'sobrado') {
-            valorTerreno = (areaTerreno - (areaConstruida * 0.6)) * 0.40;
+            valorTerreno = (areaTerreno - (areaParaSubtrair * 0.6)) * 0.40;
         } else {
-            valorTerreno = (areaTerreno - areaConstruida) * 0.40;
+            valorTerreno = (areaTerreno - areaParaSubtrair) * 0.40;
         }
         if(valorTerreno < 0) valorTerreno = 0;
     }
@@ -168,9 +172,9 @@ function calcular() {
     valorTotal = Math.ceil(valorTotal);
 
     // Formatação R$ 999.999,00
-    valorTotal = valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
+    const valorFormatado = valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
 
-    let mensagem = `Valor estimado: ${valorTotal}`;
+    let mensagem = `Valor estimado: ${valorFormatado}`;
     if(inventario) mensagem += ' | Inventário será orçado à parte';
     if(mensagemExtra) mensagem += mensagemExtra;
 
