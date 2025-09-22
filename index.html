@@ -142,6 +142,12 @@ function calcular() {
         if(cb.value == '6') inventario = true;
     });
 
+    // Desconto de coeficiente para galpão
+    if (tipoImovel === 'galpao') {
+        coef -= 0.15;
+        if (coef < 1) coef = 1; // evita coeficiente abaixo do mínimo lógico
+    }
+        
     let valorConstruida = areaParaCalculo * coef;
 
     // usa o valor ORIGINAL informado pelo usuário para subtrair do terreno
