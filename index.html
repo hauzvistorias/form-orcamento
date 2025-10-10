@@ -14,8 +14,8 @@
 </head>
 <body>
 
-<div style="text-align:left; margin-bottom:10px;">
-    <img src="jpg_02.jpg" alt="Logotipo" style="max-width:200px; height:auto; display:block;">
+<div style="text-align:center; margin-bottom:10px;">
+    <img src="jpg_02.jpg" alt="Logotipo" style="max-width:200px; height:auto; display:block; margin:0 auto;">
     <h2 style="margin:5px 0 0 0;">ORÇAMENTO DE VISTORIA IMOBILIÁRIA</h2>
 </div>
     
@@ -82,10 +82,10 @@ document.getElementById('enviarWhatsapp').addEventListener('click', () => {
     const cidade = document.getElementById('cidade').value;
     const dataVistoria = document.getElementById('dataVistoria').value;
 
-    // Mobiliário selecionado
-    const checkboxes = Array.from(document.querySelectorAll('.mobiliario:checked')).map(cb => `*${cb.nextSibling.textContent.trim()}*`).join('\n');
+    const checkboxes = Array.from(document.querySelectorAll('.mobiliario:checked'))
+        .map(cb => `*${cb.nextSibling.textContent.trim()}*`)
+        .join('\n');
 
-    // Valor do orçamento
     const valorOrcamento = resultado.textContent.replace('Valor estimado: ', '');
 
     const mensagem = `Orçamento de Vistoria:\n
@@ -113,7 +113,6 @@ function calcular() {
     const tipoImovel = document.getElementById('tipoImovel').value;
     const cidade = document.getElementById('cidade').value;
 
-    // preserva o valor informado e define área usada no cálculo (mínimo 80)
     const originalAreaConstruidaInput = parseFloat(document.getElementById('areaConstruida').value);
     let originalAreaConstruida = isNaN(originalAreaConstruidaInput) ? 0 : originalAreaConstruidaInput;
     let areaParaCalculo = originalAreaConstruida;
@@ -126,7 +125,6 @@ function calcular() {
         return;
     }
 
-    // Coeficiente mobiliário
     const checkboxes = document.querySelectorAll('.mobiliario:checked');
     if (checkboxes.length === 0) {
         resultado.textContent = 'Marque pelo menos 1 opção de mobiliário.';
@@ -142,17 +140,14 @@ function calcular() {
         if(cb.value == '6') inventario = true;
     });
 
-    // Desconto de coeficiente para galpão
     if (tipoImovel === 'galpao') {
         coef -= 0.15;
-        if (coef < 1) coef = 1; // evita coeficiente abaixo do mínimo lógico
+        if (coef < 1) coef = 1;
     }
-        
+
     let valorConstruida = areaParaCalculo * coef;
 
-    // usa o valor ORIGINAL informado pelo usuário para subtrair do terreno
     const areaParaSubtrair = originalAreaConstruida > 0 ? originalAreaConstruida : areaParaCalculo;
-
     let valorTerreno = 0;
     if(['casa-terrea','sobrado','galpao','outro'].includes(tipoImovel) && areaTerreno > 0) {
         if(tipoImovel == 'sobrado') {
@@ -174,10 +169,19 @@ function calcular() {
     // Ajuste por tipo de imóvel
     if(tipoImovel === 'kitinete') valorTotal -= 20;
 
+    // 🔹 NOVO: regra de valor mínimo por mobiliário 3, 4, 5
+    const mobiliarioEspecial = Array.from(checkboxes).filter(cb => ['3','4','5'].includes(cb.value)).length;
+    let minimo = 0;
+    if (mobiliarioEspecial >= 2) {
+        minimo = 140;
+    } else if (mobiliarioEspecial === 1) {
+        minimo = 120;
+    }
+    if (valorTotal < minimo) valorTotal = minimo;
+
     // Arredondar sempre para cima
     valorTotal = Math.ceil(valorTotal);
 
-    // Formatação R$ 999.999,00
     const valorFormatado = valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
 
     let mensagem = `Valor estimado: ${valorFormatado}`;
