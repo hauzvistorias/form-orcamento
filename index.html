@@ -160,16 +160,10 @@ function calcular() {
 
     let valorTotal = valorConstruida + valorTerreno;
 
-    // Ajuste por cidade
-    let mensagemExtra = '';
-    if(cidade === 'Salto') valorTotal += 20;
-    if(cidade === 'Indaiatuba') valorTotal += 50;
-    if(cidade === 'outra') mensagemExtra = ' | Confirmar o valor de deslocamento';
-
-    // Ajuste por tipo de imóvel
+    // 🔹 Ajuste por tipo de imóvel
     if(tipoImovel === 'kitinete') valorTotal -= 20;
 
-    // 🔹 NOVO: regra de valor mínimo por mobiliário 3, 4, 5
+    // 🔹 Regra de valor mínimo por mobiliário 3, 4, 5
     const mobiliarioEspecial = Array.from(checkboxes).filter(cb => ['3','4','5'].includes(cb.value)).length;
     let minimo = 0;
     if (mobiliarioEspecial >= 2) {
@@ -178,6 +172,12 @@ function calcular() {
         minimo = 120;
     }
     if (valorTotal < minimo) valorTotal = minimo;
+
+    // 🔹 Ajuste por cidade (agora depois do mínimo)
+    let mensagemExtra = '';
+    if(cidade === 'Salto') valorTotal += 20;
+    if(cidade === 'Indaiatuba') valorTotal += 50;
+    if(cidade === 'outra') mensagemExtra = ' | Confirmar o valor de deslocamento';
 
     // Arredondar sempre para cima
     valorTotal = Math.ceil(valorTotal);
