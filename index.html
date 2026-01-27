@@ -11,7 +11,7 @@
     input[type="number"] { width: 100px; }
     .checkbox-group { margin-left: 10px; }
     #resultado { margin-top: 20px; font-weight: bold; font-size: 1.2em; }
-    .aviso { margin-top: 10px; font-size: 0.9em; }
+    .aviso { margin-top: 10px; font-size: 0.9em; color: green; font-weight: bold; }
 </style>
 </head>
 
@@ -101,8 +101,8 @@ function calcular() {
     const tipoImovel = document.getElementById('tipoImovel').value;
     const cidadeSel = document.getElementById('cidade').value;
 
-    let area = parseFloat(document.getElementById('areaConstruida').value) || 0;
-    if (area < 70) area = 70;
+    const areaReal = parseFloat(document.getElementById('areaConstruida').value) || 0;
+    const areaCalc = Math.max(areaReal, 70);
 
     const areaTerreno = parseFloat(document.getElementById('areaTerreno').value) || 0;
 
@@ -133,8 +133,8 @@ function calcular() {
 
     /* m2 base */
     let m2base = 1.40;
-    if (area >= 301 && area <= 500) m2base = 1.30;
-    if (area >= 501) m2base = 1.20;
+    if (areaReal >= 301 && areaReal <= 500) m2base = 1.30;
+    if (areaReal >= 501) m2base = 1.20;
 
     /* Mobiliário */
     let acrescimo = 0;
@@ -151,26 +151,26 @@ function calcular() {
     let valor = valorCidade;
 
     if (tipoImovel === 'apartamento') {
-        valor += m2base * area;
+        valor += m2base * areaCalc;
     }
 
     if (tipoImovel === 'casa-terrea') {
-        valor += m2base * area;
-        valor += Math.max(0, areaTerreno - area) * (m2base * 0.3);
+        valor += m2base * areaCalc;
+        valor += Math.max(0, areaTerreno - areaReal) * (m2base * 0.3);
     }
 
     if (tipoImovel === 'sobrado') {
-        valor += m2base * area;
-        valor += Math.max(0, areaTerreno - (0.6 * area)) * (m2base * 0.3);
+        valor += m2base * areaCalc;
+        valor += Math.max(0, areaTerreno - (0.6 * areaReal)) * (m2base * 0.3);
     }
 
     if (tipoImovel === 'kitinete') {
-        valor += (m2base * area) - 30;
+        valor += (m2base * areaCalc) - 30;
     }
 
     if (tipoImovel === 'galpao') {
-        valor += (m2base * area * 0.8);
-        valor += Math.max(0, areaTerreno - area) * (m2base * 0.3);
+        valor += (m2base * areaCalc * 0.8);
+        valor += Math.max(0, areaTerreno - areaReal) * (m2base * 0.3);
     }
 
     /* Arredondamento para múltiplos de 5 */
