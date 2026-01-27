@@ -56,7 +56,7 @@
 <div class="subtitulo">Valores válidos a partir de 01/02/2026</div>
 
 <label>Cidade</label>
-<select id="cidade">
+<select id="cidade" onchange="atualizar()">
     <option value="itu">Itu</option>
     <option value="salto">Salto</option>
     <option value="indaiatuba">Indaiatuba</option>
@@ -65,7 +65,7 @@
 </select>
 
 <label>Tipo de imóvel</label>
-<select id="tipoImovel">
+<select id="tipoImovel" onchange="atualizar()">
     <option value="apartamento">Apartamento</option>
     <option value="casa">Casa térrea</option>
     <option value="sobrado">Sobrado</option>
@@ -74,19 +74,19 @@
 </select>
 
 <label>Área construída (m²)</label>
-<input type="number" id="areaConstruida" min="1">
+<input type="number" id="areaConstruida" min="1" oninput="atualizar()">
 
 <label>Área do terreno (m²)</label>
-<input type="number" id="areaTerreno" min="0">
+<input type="number" id="areaTerreno" min="0" oninput="atualizar()">
 
 <div class="checkbox-group">
     <label><strong>Mobiliário</strong></label>
-    <label><input type="checkbox" value="1" checked> 1 (sem móveis)</label>
-    <label><input type="checkbox" value="2"> 2 (cozinha com armários)</label>
-    <label><input type="checkbox" value="3"> 3 (banheiros com gabinetes e boxes)</label>
-    <label><input type="checkbox" value="4"> 4 (quartos com armários)</label>
-    <label><input type="checkbox" value="5"> 5 (outros móveis fixos planejados)</label>
-    <label><input type="checkbox" value="6"> 6 (imóvel totalmente mobiliado – orçamento sob consulta)</label>
+    <label><input type="checkbox" value="1" checked onchange="atualizar()"> 1 (sem móveis)</label>
+    <label><input type="checkbox" value="2" onchange="atualizar()"> 2 (cozinha com armários)</label>
+    <label><input type="checkbox" value="3" onchange="atualizar()"> 3 (banheiros com gabinetes e boxes)</label>
+    <label><input type="checkbox" value="4" onchange="atualizar()"> 4 (quartos com armários)</label>
+    <label><input type="checkbox" value="5" onchange="atualizar()"> 5 (outros móveis fixos planejados)</label>
+    <label><input type="checkbox" value="6" onchange="atualizar()"> 6 (imóvel totalmente mobiliado – orçamento sob consulta)</label>
 </div>
 
 <div id="resultado">Valor estimado: R$ 0</div>
@@ -104,24 +104,21 @@ function arredondarPara5(valor) {
 
 function calcularValor() {
 
-    let cidade = document.getElementById("cidade").value;
-    let tipo = document.getElementById("tipoImovel").value;
-    let areaConstruidaReal = Number(document.getElementById("areaConstruida").value);
-    let areaTerreno = Number(document.getElementById("areaTerreno").value);
+    const cidade = document.getElementById("cidade").value;
+    const tipo = document.getElementById("tipoImovel").value;
+    const areaConstruidaReal = Number(document.getElementById("areaConstruida").value);
+    const areaTerreno = Number(document.getElementById("areaTerreno").value);
 
-    if (!areaConstruidaReal) return 0;
+    if (!areaConstruidaReal) return { valor: 0, aviso: "" };
 
-    // --- FATOR CIDADE ---
+    // --- CIDADE ---
     let valorCidade = 40;
-    let avisoContato = false;
+    let aviso = "";
 
     if (cidade === "salto") valorCidade = 70;
-    else if (cidade === "indaiatuba") valorCidade = 140;
-    else if (cidade === "sorocaba") valorCidade = 150;
-    else if (cidade === "outra") {
-        valorCidade = 40;
-        avisoContato = true;
-    }
+    if (cidade === "indaiatuba") valorCidade = 140;
+    if (cidade === "sorocaba") valorCidade = 150;
+    if (cidade === "outra") aviso = " | Entre em contato para confirmar deslocamento";
 
     // --- M2 BASE ---
     let m2base = 1.40;
@@ -129,31 +126,25 @@ function calcularValor() {
     if (areaConstruidaReal >= 501) m2base = 1.20;
 
     // --- MOBILIÁRIO ---
-    let checks = document.querySelectorAll(".checkbox-group input:checked");
-    let mobiliario6 = false;
+    const checks = document.querySelectorAll(".checkbox-group input:checked");
     let acrescimos = 0;
+    let mobiliario6 = false;
 
     checks.forEach(c => {
-        if (["2","3","4","5"].includes(c.value)) {
-            acrescimos += 0.125;
-        }
+        if (["2","3","4","5"].includes(c.value)) acrescimos += 0.125;
         if (c.value === "6") mobiliario6 = true;
     });
 
     if (mobiliario6) {
-        avisoContato = true;
+        aviso += " | Mobiliário completo sob consulta";
     } else {
         m2base = m2base * (1 + acrescimos);
     }
 
-    /*
-      REGRA IMPORTANTE:
-      - O mínimo de 70 m² é aplicado SOMENTE no cálculo da parte construída
-      - A fração do terreno usa SEMPRE a área construída real informada
-    */
-    let areaConstruidaCalculo = Math.max(areaConstruidaReal, 70);
+    // --- ÁREA PARA CÁLCULO ---
+    const areaConstruidaCalc = Math.max(areaConstruidaReal, 70);
 
-    let valor = valorCidade + (m2base * areaConstruidaCalculo);
+    let valor = valorCidade + (m2base * areaConstruidaCalc);
 
     if (tipo === "casa") {
         valor += (areaTerreno - areaConstruidaReal) * (m2base * 0.3);
@@ -168,24 +159,31 @@ function calcularValor() {
     }
 
     if (tipo === "galpao") {
-        valor = valorCidade + (m2base * areaConstruidaCalculo * 0.8)
+        valor = valorCidade
+              + (m2base * areaConstruidaCalc * 0.8)
               + (areaTerreno - areaConstruidaReal) * (m2base * 0.3);
     }
 
-    valor = arredondarPara5(Math.ceil(valor));
+    // --- MÍNIMOS ---
+    let minimo = (tipo === "kitinete") ? 110 : 140;
+    if (valor < minimo) valor = minimo;
 
-    if (avisoContato) {
-        alert("Para esta configuração, entre em contato para orçamento detalhado.");
-    }
+    valor = arredondarPara5(valor);
 
-    return valor;
+    return { valor, aviso };
+}
+
+function atualizar() {
+    const r = calcularValor();
+    document.getElementById("resultado").innerText =
+        "Valor estimado: R$ " + r.valor + r.aviso;
 }
 
 function enviarWhatsApp() {
-    let valor = calcularValor();
-    document.getElementById("resultado").innerText = "Valor estimado: R$ " + valor;
-
-    let msg = encodeURIComponent("Orçamento estimado de vistoria: R$ " + valor);
+    const r = calcularValor();
+    const msg = encodeURIComponent(
+        "Orçamento estimado de vistoria:\nValor: R$ " + r.valor
+    );
     window.open("https://wa.me/55SEUNUMEROAQUI?text=" + msg, "_blank");
 }
 </script>
