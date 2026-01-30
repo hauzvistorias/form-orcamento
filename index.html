@@ -83,7 +83,7 @@
 <div id="resultado">Valor estimado: R$ 0,00</div>
 
 <div class="aviso">
-    Se o orçamento ultrapassar 10% do valor líquido da locação entre em contato, vamos conversar!
+    Se o orçamento da vistoria ultrapassar o valor de 1 mês da administração da locação entre em contato, vamos conversar!
 </div>
 
 <button id="enviarWhatsapp" type="button" style="margin-top:10px;">
@@ -136,18 +136,17 @@ function calcular() {
     if (areaReal >= 301 && areaReal <= 500) m2base = 1.30;
     if (areaReal >= 501) m2base = 1.20;
 
-    /* Mobiliário */
-    let acrescimo = 0;
+   /* Mobiliário – soma real por item */
     let inventario = false;
 
     checkboxes.forEach(cb => {
-        if (['2','3','4','5'].includes(cb.value)) acrescimo += 0.125;
-        if (cb.value === '6') inventario = true;
+    if (['2','3','4','5'].includes(cb.value)) {
+        m2base += 0.13;
+    }
+    if (cb.value === '6') inventario = true;
     });
 
-    m2base *= (1 + acrescimo);
-
-    /* Cálculo */
+        /* Cálculo */
     let valor = valorCidade;
 
     if (tipoImovel === 'apartamento') {
