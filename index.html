@@ -96,14 +96,14 @@ const resultado = document.getElementById('resultado');
 
 form.addEventListener('change', calcular);
 
+<script>
 function calcular() {
 
     const tipoImovel = document.getElementById('tipoImovel').value;
     const cidadeSel = document.getElementById('cidade').value;
 
     const areaReal = parseFloat(document.getElementById('areaConstruida').value) || 0;
-    const areaCalc = Math.max(areaReal, 70);
-
+    const areaCalc = Math.max(areaReal, 65);
     const areaTerreno = parseFloat(document.getElementById('areaTerreno').value) || 0;
 
     if (!tipoImovel) {
@@ -117,76 +117,100 @@ function calcular() {
         return;
     }
 
-    /* Cidade */
-    let valorCidade = 40;
+    /* Fator cidade */
+    let fatorCidade = 0;
     let mensagemExtra = '';
 
     switch (cidadeSel) {
-        case 'Salto': valorCidade = 70; break;
-        case 'Indaiatuba': valorCidade = 140; break;
-        case 'Sorocaba': valorCidade = 150; break;
+        case 'Salto': fatorCidade = 30; break;
+        case 'Indaiatuba': fatorCidade = 70; break;
+        case 'Sorocaba': fatorCidade = 80; break;
         case 'outra':
-            valorCidade = 40;
+            fatorCidade = 0;
             mensagemExtra = ' | Entrar em contato para confirmar valor';
             break;
     }
 
-    /* m2 base */
-    let m2base = 1.40;
-    if (areaReal >= 301 && areaReal <= 500) m2base = 1.30;
-    if (areaReal >= 501) m2base = 1.20;
+    /* Galpão */
+    if (tipoImovel === 'galpao') {
+        resultado.textContent = 'Entre em contato para orçamento.';
+        return;
+    }
 
-   /* Mobiliário – soma real por item */
     let inventario = false;
 
-    checkboxes.forEach(cb => {
-    if (['2','3','4','5'].includes(cb.value)) {
-        m2base += 0.13;
+    /* KITINETE / SALA COMERCIAL */
+    if (tipoImovel === 'kitinete') {
+        let valor = 100;
+
+        checkboxes.forEach(cb => {
+            if (['3','4','5'].includes(cb.value)) {
+                valor += 10;
+            }
+            if (cb.value === '6') inventario = true;
+        });
+
+        valor += fatorCidade;
+        valor = Math.ceil(valor / 5) * 5;
+
+        let texto = `Valor estimado: ${valor.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+            minimumFractionDigits: 2
+        })}`;
+
+        if (inventario) texto += ' | Inventário será orçado à parte';
+        if (mensagemExtra) texto += mensagemExtra;
+
+        resultado.textContent = texto;
+        return;
     }
-    if (cb.value === '6') inventario = true;
+
+    /* APARTAMENTO / CASA / SOBRADO */
+
+    let m2base = 1.40;
+
+    checkboxes.forEach(cb => {
+        if (['2','3','4','5'].includes(cb.value)) {
+            m2base += 0.15;
+        }
+        if (cb.value === '6') inventario = true;
     });
 
-        /* Cálculo */
-    let valor = valorCidade;
+    if (areaReal >= 301 && areaReal <= 500) m2base *= 0.9;
+    if (areaReal >= 501) m2base *= 0.8;
 
-    if (tipoImovel === 'apartamento') {
-        valor += m2base * areaCalc;
-    }
+    let valor = 49;
 
+    /* Área construída */
+    const valorAreaConstruida = m2base * areaCalc;
+    valor += valorAreaConstruida;
+
+    /* Área externa */
     if (tipoImovel === 'casa-terrea') {
-        valor += m2base * areaCalc;
         valor += Math.max(0, areaTerreno - areaReal) * (m2base * 0.3);
     }
 
     if (tipoImovel === 'sobrado') {
-        valor += m2base * areaCalc;
         valor += Math.max(0, areaTerreno - (0.6 * areaReal)) * (m2base * 0.3);
     }
 
-    if (tipoImovel === 'kitinete') {
-        valor += (m2base * areaCalc) - 30;
-    }
+    valor += fatorCidade;
 
-    if (tipoImovel === 'galpao') {
-        valor += (m2base * areaCalc * 0.8);
-        valor += Math.max(0, areaTerreno - areaReal) * (m2base * 0.3);
-    }
-
-    /* Arredondamento para múltiplos de 5 */
     valor = Math.ceil(valor / 5) * 5;
 
-    const valorFormatado = valor.toLocaleString('pt-BR', {
+    let texto = `Valor estimado: ${valor.toLocaleString('pt-BR', {
         style: 'currency',
         currency: 'BRL',
         minimumFractionDigits: 2
-    });
+    })}`;
 
-    let texto = `Valor estimado: ${valorFormatado}`;
     if (inventario) texto += ' | Inventário será orçado à parte';
     if (mensagemExtra) texto += mensagemExtra;
 
     resultado.textContent = texto;
 }
+</script>
 
 document.getElementById('enviarWhatsapp').addEventListener('click', () => {
 
