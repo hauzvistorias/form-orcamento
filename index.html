@@ -12,6 +12,7 @@
     .checkbox-group { margin-left: 10px; }
     #resultado { margin-top: 20px; font-weight: bold; font-size: 1.2em; }
     .aviso { margin-top: 10px; font-size: 0.9em; color: green; font-weight: bold; }
+    .padrao { font-size: 0.9em; font-style: italic; margin-left: 10px; }
 </style>
 </head>
 
@@ -21,58 +22,61 @@
     <img src="jpg_02.jpg" alt="Logotipo" style="max-width:200px; height:auto; display:block; margin:0 auto;">
     <h2 style="margin:5px 0 0 0;">ORÇAMENTO DE VISTORIA IMOBILIÁRIA</h2>
     <div style="font-size:0.85em; font-style:italic; margin-top:4px;">
-        Valores válidos a partir de 01/02/2026
+        Valores válidos a partir de 01/02/2026 – sujeito a confirmação pelo vistoriador no momento da vistoria
     </div>
 </div>
 
 <form id="vistoriaForm">
 
-    <label>Tipo de vistoria:
-        <select id="tipoVistoria">
-            <option value="entrada" selected>Entrada</option>
-            <option value="saida">Saída</option>
-            <option value="outro">Outro</option>
-        </select>
-    </label>
+<label>Tipo de vistoria:
+    <select id="tipoVistoria">
+        <option value="entrada" selected>Entrada</option>
+        <option value="saida">Saída</option>
+        <option value="outro">Outro</option>
+    </select>
+</label>
 
-    <label>Tipo de imóvel:
-        <select id="tipoImovel" required>
-            <option value="" disabled selected>--- Selecione o tipo ---</option>
-            <option value="casa-terrea">Casa Térrea</option>
-            <option value="sobrado">Sobrado</option>
-            <option value="apartamento">Apartamento</option>
-            <option value="galpao">Galpão</option>
-            <option value="kitinete">Kitinete / Sala Comercial</option>
-        </select>
-    </label>
+<label>Tipo de imóvel:
+    <select id="tipoImovel" required>
+        <option value="" disabled selected>--- Selecione o tipo ---</option>
+        <option value="apartamento">Apartamento</option>
+        <option value="casa-terrea">Casa Térrea</option>
+        <option value="sobrado">Sobrado</option>
+        <option value="kitinete">Kitinete / Sala Comercial</option>
+        <option value="galpao">Galpão</option>
+    </select>
+</label>
 
-    <label>Área construída (m²):
-        <input type="number" id="areaConstruida" min="1" required>
-    </label>
+<label>Área construída (m²):
+    <input type="number" id="areaConstruida" min="1" required>
+</label>
 
-    <label>Área do terreno (m²):
-        <input type="number" id="areaTerreno" min="0">
-    </label>
+<label>Área do terreno (m²):
+    <input type="number" id="areaTerreno" min="0">
+</label>
 
-    <label>Mobiliário (marque pelo menos 1):</label>
-    <div class="checkbox-group">
-        <label><input type="checkbox" class="mobiliario" value="1"> 1. Nenhum/planejados cozinha e banheiros</label>
-        <label><input type="checkbox" class="mobiliario" value="2"> 2. Planejados dormitórios/outros ambientes</label>
-        <label><input type="checkbox" class="mobiliario" value="3"> 3. Eletros (geladeira, fogão, forno, máq. lavar, etc.)</label>
-        <label><input type="checkbox" class="mobiliario" value="4"> 4. Móveis soltos - mesas, cadeiras, sofá, poltrona</label>
-        <label><input type="checkbox" class="mobiliario" value="5"> 5. Móveis soltos - camas, mesa de cabeceira</label>
-        <label><input type="checkbox" class="mobiliario" value="6"> 6. Inventário - louças, talheres, objetos decorativos, eletrodomésticos pequenos, etc</label>
-    </div>
+<label>Mobiliário:</label>
+<div class="padrao">
+    Padrão: imóvel vazio ou com móveis planejados na cozinha e banheiros
+</div>
 
-    <label>Cidade:
-        <select id="cidade" required>
-            <option value="Itu" selected>Itu</option>
-            <option value="Salto">Salto</option>
-            <option value="Indaiatuba">Indaiatuba</option>
-            <option value="Sorocaba">Sorocaba</option>
-            <option value="outra">Outra</option>
-        </select>
-    </label>
+<div class="checkbox-group">
+    <label><input type="checkbox" class="mobiliario" value="1"> 1. Planejados dormitórios/outros ambientes</label>
+    <label><input type="checkbox" class="mobiliario" value="2"> 2. Eletros (geladeira, fogão, forno, máq. lavar etc.)</label>
+    <label><input type="checkbox" class="mobiliario" value="3"> 3. Móveis soltos – mesas, cadeiras, sofá, poltronas</label>
+    <label><input type="checkbox" class="mobiliario" value="4"> 4. Móveis soltos – camas, mesas de cabeceira</label>
+    <label><input type="checkbox" class="mobiliario" value="5"> 5. Inventário – louças, talheres, objetos decorativos etc.</label>
+</div>
+
+<label>Cidade:
+    <select id="cidade" required>
+        <option value="Itu" selected>Itu</option>
+        <option value="Salto">Salto</option>
+        <option value="Indaiatuba">Indaiatuba</option>
+        <option value="Sorocaba">Sorocaba</option>
+        <option value="outra">Outra</option>
+    </select>
+</label>
 
 </form>
 
@@ -80,7 +84,7 @@
     <input type="date" id="dataVistoria">
 </label>
 
-<div id="resultado">Valor estimado: R$ 0,00</div>
+<div id="resultado">Valor estimado: R$ 0</div>
 
 <div class="aviso">
     Se o orçamento da vistoria ultrapassar o valor de 1 mês da administração da locação entre em contato, vamos conversar!
@@ -102,93 +106,48 @@ function calcular() {
     const cidadeSel = document.getElementById('cidade').value;
 
     const areaReal = parseFloat(document.getElementById('areaConstruida').value) || 0;
-    const areaMin = 65;
-    const areaCalc = Math.max(areaReal, areaMin);
+    const areaCalc = Math.max(areaReal, 65);
 
-    const areaTerreno = parseFloat(document.getElementById('areaTerreno').value) || 0;
-
-    if (!tipoImovel) {
-        resultado.textContent = 'Selecione o tipo de imóvel.';
-        return;
-    }
-
-    const checkboxes = document.querySelectorAll('.mobiliario:checked');
-    if (checkboxes.length === 0) {
-        resultado.textContent = 'Marque pelo menos 1 opção de mobiliário.';
-        return;
-    }
-
-    /* Fator cidade */
     let fatorCidade = 0;
     let mensagemExtra = '';
 
-    switch (cidadeSel) {
-        case 'Salto': fatorCidade = 30; break;
-        case 'Indaiatuba': fatorCidade = 70; break;
-        case 'Sorocaba': fatorCidade = 80; break;
-        case 'outra':
-            mensagemExtra = ' | Entrar em contato para confirmar valor';
-            break;
-    }
+    if (cidadeSel === 'Salto') fatorCidade = 30;
+    if (cidadeSel === 'Indaiatuba') fatorCidade = 70;
+    if (cidadeSel === 'Sorocaba') fatorCidade = 80;
+    if (cidadeSel === 'outra') mensagemExtra = ' | Entrar em contato para confirmar valor';
 
-    /* Galpão */
-    if (tipoImovel === 'galpao') {
-        resultado.textContent = 'Para galpões, favor entrar em contato para orçamento.';
-        return;
-    }
-
-    /* Kitinete */
-    if (tipoImovel === 'kitinete') {
-        let valor = 100;
-        checkboxes.forEach(cb => {
-            if (['3','4','5'].includes(cb.value)) valor += 10;
-        });
-        valor += fatorCidade;
-        resultado.textContent = `Valor estimado: ${valor.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}`;
-        return;
-    }
-
-    /* m2 base */
-    let m2base = 1.40;
+    const checkboxes = document.querySelectorAll('.mobiliario:checked');
+    let qtdMob = 0;
+    let inventario = false;
 
     checkboxes.forEach(cb => {
-        if (['2','3','4','5'].includes(cb.value)) m2base += 0.15;
-        if (cb.value === '6') mensagemExtra += ' | Inventário será orçado à parte';
+        if (['1','2','3','4'].includes(cb.value)) qtdMob++;
+        if (cb.value === '5') inventario = true;
     });
 
-    if (areaReal >= 301 && areaReal <= 500) m2base *= 0.9;
-    if (areaReal >= 501) m2base *= 0.8;
-
-    /* Valores */
-    let valorAreaConstruida = m2base * (65 + (areaCalc - 65));
-    let valorAreaExterna = 0;
-
-    if (tipoImovel === 'casa-terrea') {
-        valorAreaExterna = Math.max(0, areaTerreno - areaReal) * (m2base * 0.3);
+    if (tipoImovel === 'galpao') {
+        resultado.textContent = 'Galpão: entrar em contato para orçamento.';
+        return;
     }
 
-    if (tipoImovel === 'sobrado') {
-        valorAreaExterna = Math.max(0, areaTerreno - (0.6 * areaReal)) * (m2base * 0.3);
+    let valor = 0;
+
+    if (tipoImovel === 'kitinete') {
+        valor = 100 + (qtdMob * 10) + fatorCidade;
+    } else {
+        let base = 140 + (qtdMob * 15);
+        let m2 = 1.40 + (qtdMob * 0.15);
+        valor = base + ((areaCalc - 65) * m2) + fatorCidade;
     }
 
-    let valor = 49 + valorAreaConstruida + valorAreaExterna + fatorCidade;
-    valor = Math.ceil(valor / 5) * 5;
+    valor = Math.ceil(valor);
 
-    resultado.textContent =
-        `Valor estimado: ${valor.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}${mensagemExtra}`;
+    let texto = `Valor estimado: R$ ${valor}`;
+    if (inventario) texto += ' | Inventário será orçado à parte';
+    if (mensagemExtra) texto += mensagemExtra;
+
+    resultado.textContent = texto;
 }
-
-document.getElementById('enviarWhatsapp').addEventListener('click', () => {
-
-    const valorOrcamento = document
-        .getElementById('resultado')
-        .textContent
-        .replace('Valor estimado: ', '');
-
-    const mensagem = `Orçamento de Vistoria:\n\nValor calculado: *${valorOrcamento}*`;
-
-    window.open(`https://wa.me/5511974697416?text=${encodeURIComponent(mensagem)}`, '_blank');
-});
 </script>
 
 </body>
