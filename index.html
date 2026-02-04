@@ -96,14 +96,15 @@ const resultado = document.getElementById('resultado');
 
 form.addEventListener('change', calcular);
 
-<script>
 function calcular() {
 
     const tipoImovel = document.getElementById('tipoImovel').value;
     const cidadeSel = document.getElementById('cidade').value;
 
     const areaReal = parseFloat(document.getElementById('areaConstruida').value) || 0;
-    const areaCalc = Math.max(areaReal, 65);
+    const areaMin = 65;
+    const areaCalc = Math.max(areaReal, areaMin);
+
     const areaTerreno = parseFloat(document.getElementById('areaTerreno').value) || 0;
 
     if (!tipoImovel) {
@@ -126,117 +127,65 @@ function calcular() {
         case 'Indaiatuba': fatorCidade = 70; break;
         case 'Sorocaba': fatorCidade = 80; break;
         case 'outra':
-            fatorCidade = 0;
             mensagemExtra = ' | Entrar em contato para confirmar valor';
             break;
     }
 
     /* Galpão */
     if (tipoImovel === 'galpao') {
-        resultado.textContent = 'Entre em contato para orçamento.';
+        resultado.textContent = 'Para galpões, favor entrar em contato para orçamento.';
         return;
     }
 
-    let inventario = false;
-
-    /* KITINETE / SALA COMERCIAL */
+    /* Kitinete */
     if (tipoImovel === 'kitinete') {
         let valor = 100;
-
         checkboxes.forEach(cb => {
-            if (['3','4','5'].includes(cb.value)) {
-                valor += 10;
-            }
-            if (cb.value === '6') inventario = true;
+            if (['3','4','5'].includes(cb.value)) valor += 10;
         });
-
         valor += fatorCidade;
-        valor = Math.ceil(valor / 5) * 5;
-
-        let texto = `Valor estimado: ${valor.toLocaleString('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-            minimumFractionDigits: 2
-        })}`;
-
-        if (inventario) texto += ' | Inventário será orçado à parte';
-        if (mensagemExtra) texto += mensagemExtra;
-
-        resultado.textContent = texto;
+        resultado.textContent = `Valor estimado: ${valor.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}`;
         return;
     }
 
-    /* APARTAMENTO / CASA / SOBRADO */
-
+    /* m2 base */
     let m2base = 1.40;
 
     checkboxes.forEach(cb => {
-        if (['2','3','4','5'].includes(cb.value)) {
-            m2base += 0.15;
-        }
-        if (cb.value === '6') inventario = true;
+        if (['2','3','4','5'].includes(cb.value)) m2base += 0.15;
+        if (cb.value === '6') mensagemExtra += ' | Inventário será orçado à parte';
     });
 
     if (areaReal >= 301 && areaReal <= 500) m2base *= 0.9;
     if (areaReal >= 501) m2base *= 0.8;
 
-    let valor = 49;
+    /* Valores */
+    let valorAreaConstruida = m2base * (65 + (areaCalc - 65));
+    let valorAreaExterna = 0;
 
-    /* Área construída */
-    const valorAreaConstruida = m2base * areaCalc;
-    valor += valorAreaConstruida;
-
-    /* Área externa */
     if (tipoImovel === 'casa-terrea') {
-        valor += Math.max(0, areaTerreno - areaReal) * (m2base * 0.3);
+        valorAreaExterna = Math.max(0, areaTerreno - areaReal) * (m2base * 0.3);
     }
 
     if (tipoImovel === 'sobrado') {
-        valor += Math.max(0, areaTerreno - (0.6 * areaReal)) * (m2base * 0.3);
+        valorAreaExterna = Math.max(0, areaTerreno - (0.6 * areaReal)) * (m2base * 0.3);
     }
 
-    valor += fatorCidade;
-
+    let valor = 49 + valorAreaConstruida + valorAreaExterna + fatorCidade;
     valor = Math.ceil(valor / 5) * 5;
 
-    let texto = `Valor estimado: ${valor.toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        minimumFractionDigits: 2
-    })}`;
-
-    if (inventario) texto += ' | Inventário será orçado à parte';
-    if (mensagemExtra) texto += mensagemExtra;
-
-    resultado.textContent = texto;
+    resultado.textContent =
+        `Valor estimado: ${valor.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}${mensagemExtra}`;
 }
-</script>
 
 document.getElementById('enviarWhatsapp').addEventListener('click', () => {
 
-    const tipoVistoria = document.getElementById('tipoVistoria').value;
-    const tipoImovel = document.getElementById('tipoImovel').value;
-    const areaConstruida = document.getElementById('areaConstruida').value;
-    const areaTerreno = document.getElementById('areaTerreno').value || 0;
-    const cidade = document.getElementById('cidade').value;
-    const dataVistoria = document.getElementById('dataVistoria').value;
+    const valorOrcamento = document
+        .getElementById('resultado')
+        .textContent
+        .replace('Valor estimado: ', '');
 
-    const checkboxes = Array.from(document.querySelectorAll('.mobiliario:checked'))
-        .map(cb => `*${cb.nextSibling.textContent.trim()}*`)
-        .join('\n');
-
-    const valorOrcamento = resultado.textContent.replace('Valor estimado: ', '');
-
-    const mensagem = `Orçamento de Vistoria:\n
-Data: *${dataVistoria}*\n
-Tipo de vistoria: *${tipoVistoria}*\n
-Tipo de imóvel: *${tipoImovel}*\n
-Área construída: *${areaConstruida} m²*\n
-Área do terreno: *${areaTerreno} m²*\n
-Cidade: *${cidade}*\n
-Mobiliário:\n
-${checkboxes}\n
-Valor calculado: *${valorOrcamento}*`;
+    const mensagem = `Orçamento de Vistoria:\n\nValor calculado: *${valorOrcamento}*`;
 
     window.open(`https://wa.me/5511974697416?text=${encodeURIComponent(mensagem)}`, '_blank');
 });
